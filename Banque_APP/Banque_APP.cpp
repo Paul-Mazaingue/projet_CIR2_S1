@@ -38,16 +38,16 @@ BankFrame::BankFrame(const wxString& title): wxFrame(nullptr, wxID_ANY, title)
 	panel_ = new wxPanel(this);
 	
 	// Message de bienvenue 
-	welcome_ = new wxStaticText(panel_, wxID_ANY, "Texte de bienvenue\ndans lequel on peut mettre du texte", wxPoint(100, 100), wxSize(600, -1), wxALIGN_CENTER_HORIZONTAL);
+	welcome_ = new wxStaticText(panel_, wxID_ANY, "Bienvenue dans votre banque en ligne,\nvotre partenaire financier de confiance.", wxPoint(100, 100), wxSize(600, -1), wxALIGN_CENTER_HORIZONTAL);
 	// Changement de la taille de la police
 	wxFont font = welcome_->GetFont();
 	font.SetPointSize(24);
 	welcome_->SetFont(font);
 	
 	// Boutons afin de choisir le serveur
-	server1_ = new wxButton(panel_, wxID_ANY, "Server 1", wxPoint(100, 275), wxSize(150, 50));
-	server2_ = new wxButton(panel_, wxID_ANY, "Server 2", wxPoint(325, 275), wxSize(150, 50));
-	server3_ = new wxButton(panel_, wxID_ANY, "Server 3", wxPoint(550, 275), wxSize(150, 50));
+	server1_ = new wxButton(panel_, wxID_ANY, "Paris", wxPoint(100, 275), wxSize(150, 50));
+	server2_ = new wxButton(panel_, wxID_ANY, "Londre", wxPoint(325, 275), wxSize(150, 50));
+	server3_ = new wxButton(panel_, wxID_ANY, "Berlin", wxPoint(550, 275), wxSize(150, 50));
 	server1_->Bind(wxEVT_BUTTON, &BankFrame::OnServer, this);
 	server2_->Bind(wxEVT_BUTTON, &BankFrame::OnServer, this);
 	server3_->Bind(wxEVT_BUTTON, &BankFrame::OnServer, this);
@@ -786,6 +786,11 @@ int BankFrame::GenerateClientNumber()
 // Fonction qui vérifie si une numéro de client existe déjà
 bool BankFrame::IsPresent(int clientNumber) {
 	boost::property_tree::ptree pt;
+	ifstream file_out("bank.json");
+	if (!file_out.good()) {
+		return true;
+	}
+	file_out.close();
 
 	// On lit le fichier JSON
 	try {
@@ -846,6 +851,7 @@ void BankFrame::Creation(wxCommandEvent& event)
 		}
 		else
 		{
+			
 			// On récupère les infos du client
 			firstName_ = firstName;
 			lastName_ = lastName;
@@ -857,10 +863,13 @@ void BankFrame::Creation(wxCommandEvent& event)
 			balance_.Add(0);
 
 			// Si le nombre de transaction est au max on supprime la première transaction
+
+	       
 			if (transactionList_.GetCount() == 9999) {
 				transactionList_.RemoveAt(0);
 				transactionListAccount_.RemoveAt(0);
 			}
+			
 			transactionList_.Add("Creation du compte");
 			transactionListAccount_.Add(0);
 
@@ -880,6 +889,13 @@ void BankFrame::Creation(wxCommandEvent& event)
 // Méthode qui récupère les infos du client
 bool BankFrame::ClientInfo(wxString clientNumber, wxString password) {
 	boost::property_tree::ptree pt;
+
+	// Si le fichier n'existe pas, on affiche une erreur
+	std::ifstream file("bank.json");
+	if (!file.good()) {
+		return false;
+	}
+	
 
 	// On lit le fichier JSON
 	try {
@@ -989,7 +1005,7 @@ IMPLEMENT_APP(BankApp)
 bool BankApp::OnInit()
 {
 	// on instancie une fenêtre
-	BankFrame* frame = new BankFrame("Bank_Name");
+	BankFrame* frame = new BankFrame("Absolute Financial Corp");
 	// On définie la taille de la fenêtre (sans les bordures)
 	frame->SetClientSize(800, 600);
 	// On centre la fenêtre sur l'écran
