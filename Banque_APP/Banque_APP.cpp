@@ -34,17 +34,17 @@ BankFrame::BankFrame(const wxString& title): wxFrame(nullptr, wxID_ANY, title)
 	clientNumberTransfer_ = 0;
 	selectedIndexAccountTransfer_ = -1;
 	
-	// Le panneau sur lequel on va mettre les élements
+	// Panneau sur lequel on va mettre les élements
 	panel_ = new wxPanel(this);
 	
-	// Le message de bienvenue 
+	// Message de bienvenue 
 	welcome_ = new wxStaticText(panel_, wxID_ANY, "Texte de bienvenue\ndans lequel on peut mettre du texte", wxPoint(100, 100), wxSize(600, -1), wxALIGN_CENTER_HORIZONTAL);
-	// On change la taille de la police
+	// Changement de la taille de la police
 	wxFont font = welcome_->GetFont();
 	font.SetPointSize(24);
 	welcome_->SetFont(font);
 	
-	// Les boutons afin de choisir le serveur
+	// Boutons afin de choisir le serveur
 	server1_ = new wxButton(panel_, wxID_ANY, "Server 1", wxPoint(100, 275), wxSize(150, 50));
 	server2_ = new wxButton(panel_, wxID_ANY, "Server 2", wxPoint(325, 275), wxSize(150, 50));
 	server3_ = new wxButton(panel_, wxID_ANY, "Server 3", wxPoint(550, 275), wxSize(150, 50));
@@ -52,7 +52,7 @@ BankFrame::BankFrame(const wxString& title): wxFrame(nullptr, wxID_ANY, title)
 	server2_->Bind(wxEVT_BUTTON, &BankFrame::OnServer, this);
 	server3_->Bind(wxEVT_BUTTON, &BankFrame::OnServer, this);
 
-	// Les boutons pour se connecter ou créer un compte
+	// Boutons pour se connecter ou créer un compte
 	connexion_button_ = new wxButton(panel_, wxID_ANY, "Se connecter", wxPoint(150, 275), wxSize(200, 50));
 	creation_button_ = new wxButton(panel_, wxID_ANY, "Créer un compte", wxPoint(475, 275), wxSize(200, 50));
 	connexion_button_->Bind(wxEVT_BUTTON, &BankFrame::Connexion, this);
@@ -61,14 +61,13 @@ BankFrame::BankFrame(const wxString& title): wxFrame(nullptr, wxID_ANY, title)
 	connexion_button_->Show(false);
 	creation_button_->Show(false);
 
-	// Pour le debug, à supprimer à la fin
-	CreateStatusBar();
-
 	// Quand la fenêtre se ferme
 	this->Bind(wxEVT_CLOSE_WINDOW, &BankFrame::OnClose, this);
 }
 
+// Méthode qui affiche le compte sélectionné
 void BankFrame::AccountDisplay() {
+	// On cache les éléments de la page client
 	accountsListBox_->Show(false);
 	accessAccountButton_->Show(false);
 	deleteAccountButton_->Show(false);
@@ -78,12 +77,12 @@ void BankFrame::AccountDisplay() {
 	clientText_->Show(false);
 	accountsLabel_->Show(false);
 
+	// On affiche les éléments de la page compte
 	wxString clientText2 = wxString::Format("%s %s", firstName_, lastName_);
 	clientText2_ = new wxStaticText(panel_, wxID_ANY, clientText2, wxPoint(325, 30), wxSize(150, -1), wxALIGN_CENTER);
 
 	wxString accountText = wxString::Format("Nom du compte : %s", accountName_[selectedIndexAccount_]);
 	accountText_ = new wxStaticText(panel_, wxID_ANY, accountText, wxPoint(200, 110), wxSize(400, -1), wxALIGN_CENTER);
-
 	
 	wxString balanceText = wxString::Format("Solde : %.2f", balance_[selectedIndexAccount_]);
 	balanceText_ = new wxStaticText(panel_, wxID_ANY, balanceText, wxPoint(200, 200), wxSize(400, -1), wxALIGN_CENTER);
@@ -91,27 +90,29 @@ void BankFrame::AccountDisplay() {
 	wxString rateText = wxString::Format("Taux : %.2f", rate_);
 	rateText_ = new wxStaticText(panel_, wxID_ANY, rateText, wxPoint(600, 30), wxSize(200, -1), wxALIGN_CENTER);
 	
-
+	// On redéfinie la taille des texte
 	wxFont font = clientText2_->GetFont();
-	font.SetPointSize(12); // Set the font size here
+	font.SetPointSize(12); 
 	clientText2_->SetFont(font);
 
 	font = accountText_->GetFont();
-	font.SetPointSize(18); // Set the font size here
+	font.SetPointSize(18); 
 	accountText_->SetFont(font);
 
 	font = balanceText_->GetFont();
-	font.SetPointSize(18); // Set the font size here
+	font.SetPointSize(18); 
 	balanceText_->SetFont(font);
 
 	font = rateText_->GetFont();
-	font.SetPointSize(18); // Set the font size here
+	font.SetPointSize(18); 
 	rateText_->SetFont(font);
 
+	// Si le compte est un compte épargne on affiche le taux
 	if (!accountType_[selectedIndexAccount_]) {
 		rateText_->Show(false);
 	}
 
+	// On affiche les boutons et on les relie avec les méthodes
 	addButton_ = new wxButton(panel_, wxID_ANY, "Ajouter", wxPoint(50, 300), wxSize(200, 50));
 	withdrawButton_ = new wxButton(panel_, wxID_ANY, "Retirer", wxPoint(300, 300), wxSize(200, 50));
 	TransferButton_ = new wxButton(panel_, wxID_ANY, "Transférer", wxPoint(550, 300), wxSize(200, 50));
@@ -124,10 +125,9 @@ void BankFrame::AccountDisplay() {
 
 	changeAccountButton_ = new wxButton(panel_, wxID_ANY, "Changer de compte", wxPoint(550, 450), wxSize(200, 50));
 	changeAccountButton_->Bind(wxEVT_BUTTON, &BankFrame::OnChangeAccount, this);
-
-	
 }
 
+// Méthode qui affiche la liste des transactions
 void BankFrame::OnTransactionAccount(wxCommandEvent& event)
 {
 	// Crée le pop up
@@ -151,91 +151,102 @@ void BankFrame::OnTransactionAccount(wxCommandEvent& event)
 	dialog->Destroy();
 }
 
+// Méthode qui ajoute de l'argent sur le compte
 void BankFrame::OnAddAccount(wxCommandEvent& event) {
-	// Show a dialog to enter the amount to add
+	// Affiche un pop up pour demander le montant à ajouter
 	wxTextEntryDialog dialog(this, "Entrez le montant à ajouter :", "Ajout d'argent");
 	if (dialog.ShowModal() == wxID_OK)
 	{
-		// Get the entered amount
+		// On récupère le montant
 		wxString amountString = dialog.GetValue();
 		double amount;
 		if (amountString.ToDouble(&amount) && amount > 0)
 		{
 			if(balance_[selectedIndexAccount_] + amount < 1000000000) {
-				// The entered amount is a valid number
-				balance_[selectedIndexAccount_] += amount; // Add the amount to the balance
+				// Si le montant est valide on ajoute l'argent
+				balance_[selectedIndexAccount_] += amount; 
 
-				// Update the balance text
+				// On met à jour le solde
 				wxString balanceText = wxString::Format("Solde : %.2f", balance_[selectedIndexAccount_]);
 				balanceText_->SetLabel(balanceText);
 
-				// Add the transaction to the transaction list
+				// On ajoute la transaction à la liste
 				wxString transaction = wxString::Format("Ajout de %.2f", amount);
+				
+				// Si on est au max de transactions on supprime la plus ancienne
+				if (transactionList_.GetCount() == 9999) {
+					transactionList_.RemoveAt(0);
+					transactionListAccount_.RemoveAt(0);
+				}
+				
 				transactionList_.Add(transaction);
 				transactionListAccount_.Add(selectedIndexAccount_);
-
-				wxLogStatus("Ajout d'argent réussi");
 			}
 			else {
-				// The balance would exceed the maximum balance of 1000000000
-				wxMessageBox("Le solde ne peut pas dépasser 1000000000.", "Erreur", wxICON_ERROR);
-				wxLogStatus("Erreur d'ajout d'argent : solde maximum dépassé");
+				// La balance ne peut pas dépasser 1 milliard
+				wxMessageBox("Le solde ne peut pas dépasser 1 milliard.", "Erreur", wxICON_ERROR);
 			}
 		}
 		else
 		{
-			// The entered amount is not a valid number
+			// Si le montant n'est pas valide on affiche une erreur
 			wxMessageBox("Le montant entré n'est pas valide.", "Erreur", wxICON_ERROR);
-			wxLogStatus("Erreur d'ajout d'argent");
 		}
 	}
 }
 
+// Méthode qui retire de l'argent sur le compte
 void BankFrame::OnWithdrawAccount(wxCommandEvent& event) {
-	// Show a dialog to enter the amount to withdraw
+	// Affiche un pop up pour demander le montant à retirer
 	wxTextEntryDialog dialog(this, "Entrez le montant à retirer :", "Retrait d'argent");
 	if (dialog.ShowModal() == wxID_OK)
 	{
-		// Get the entered amount
+		// On récupère le montant
 		wxString amountString = dialog.GetValue();
 		double amount;
 		if (amountString.ToDouble(&amount) && amount > 0)
 		{
-			// The entered amount is a valid number
 			if (amount > balance_[selectedIndexAccount_])
 			{
-				// The balance would become negative
+				// Si le montant est supérieur au solde on affiche une erreur
 				wxMessageBox("Le solde ne peut pas devenir négatif.", "Erreur", wxICON_ERROR);
-				wxLogStatus("Erreur de retrait d'argent : solde négatif");
 			}
 			else
 			{
-				// The balance is within the limits
+				// Si le montant est valide on retire l'argent
 				balance_[selectedIndexAccount_] -= amount; // Withdraw the amount from the balance
 
-				// Update the balance text
+				// On met à jour le solde
 				wxString balanceText = wxString::Format("Solde : %.2f", balance_[selectedIndexAccount_]);
 				balanceText_->SetLabel(balanceText);
 
-				// Add the transaction to the transaction list
+				// On ajoute la transaction à la liste
 				wxString transaction = wxString::Format("Retrait de %.2f", amount);
+				
+				// Si on est au max de transactions on supprime la plus ancienne
+				if (transactionList_.GetCount() == 9999) {
+					transactionList_.RemoveAt(0);
+					transactionListAccount_.RemoveAt(0);
+				}
+
 				transactionList_.Add(transaction);
 				transactionListAccount_.Add(selectedIndexAccount_);
-
-				wxLogStatus("Retrait d'argent réussi");
 			}
 		}
 		else
 		{
-			// The entered amount is not a valid number
+			// Si le montant n'est pas valide on affiche une erreur
 			wxMessageBox("Le montant entré n'est pas valide.", "Erreur", wxICON_ERROR);
-			wxLogStatus("Erreur de retrait d'argent");
 		}
 	}
 }
 
+// Méthode qui récupère les infos du compte qui reçois l'argent
 bool BankFrame::ClientInfoTransfer(wxString clientNumber) {
+	
 	boost::property_tree::ptree pt;
+	
+	// On lit le fichier json
 	try {
 		read_json("bank.json", pt);
 	}
@@ -243,20 +254,21 @@ bool BankFrame::ClientInfoTransfer(wxString clientNumber) {
 		wxMessageBox(e.what(), "Erreur", wxOK | wxICON_ERROR);
 	}
 
+	// On vérifie si le numéro de client existe
 	if (pt.count(clientNumber.ToStdString()) == 0) // vérifie que le numéro de client existe dans le fichier json
 	{
 		return false;
 	}
 
 	
-	// récupère les infos du client et les stocke dans les attributs de la classe
+	// On récupère les informations du client
 	firstNameTransfer_ = pt.get<std::string>(clientNumber.ToStdString() + ".firstname_");
 	lastNameTransfer_ = pt.get<std::string>(clientNumber.ToStdString() + ".lastName_");
 	addressTransfer_ = pt.get<std::string>(clientNumber.ToStdString() + ".address_");
 	passwordTransfer_ = pt.get<std::string>(clientNumber.ToStdString() + ".password_");
 	clientNumber.ToDouble(&clientNumberTransfer_);
 
-	// récupère les infos des comptes du client et les stocke dans les wxArray correspondants
+	// On récupère les informations des comptes
 	for (auto& account : pt.get_child(clientNumber.ToStdString() + ".accountName_"))
 	{
 		accountNameTransfer_.Add(account.second.data());
@@ -265,7 +277,7 @@ bool BankFrame::ClientInfoTransfer(wxString clientNumber) {
 	}
 	
 
-	// récupère les infos des transactions du client et les stocke dans les wxArray correspondants
+	// On récupère les informations des transactions
 	for (auto& transaction : pt.get_child(clientNumber.ToStdString() + ".transactionList_"))
 	{
 		transactionListTransfer_.Add(transaction.second.data());
@@ -275,13 +287,17 @@ bool BankFrame::ClientInfoTransfer(wxString clientNumber) {
 	return true;
 }
 
+// Méthode qui sauvegarde les informations du compte qui a reçu le transfert
 void BankFrame::ClientInfoSaveTransfer() {
 	boost::property_tree::ptree pt;
 
+	
 	ifstream file_out("bank.json");
+	// Si le fichier existe on le lit
 	if (file_out.good()) {
 		try {
 			read_json("bank.json", pt);
+			// On supprime les informations relative au client
 			pt.erase(to_string((int)clientNumberTransfer_));
 		}
 		catch (const std::exception& e) {
@@ -289,13 +305,14 @@ void BankFrame::ClientInfoSaveTransfer() {
 		}
 	}
 
-	// Ajout des informations du client dans la variable pt
-
+	
+	// Ajout des informations du client
 	pt.put(to_string((int)clientNumberTransfer_) + ".firstname_", firstNameTransfer_);
 	pt.put(to_string((int)clientNumberTransfer_) + ".lastName_", lastNameTransfer_);
 	pt.put(to_string((int)clientNumberTransfer_) + ".password_", passwordTransfer_);
 	pt.put(to_string((int)clientNumberTransfer_) + ".address_", addressTransfer_);
 
+	// Ajout des informations des comptes
 	for (size_t i = 0; i < accountNameTransfer_.size(); i++)
 	{
 		pt.put(to_string((int)clientNumberTransfer_) + ".accountName_." + to_string(i), accountNameTransfer_[i]);
@@ -303,57 +320,59 @@ void BankFrame::ClientInfoSaveTransfer() {
 		pt.put(to_string((int)clientNumberTransfer_) + ".balance_." + to_string(i), balanceTransfer_[i]);
 	}
 
+	// Ajout des informations des transactions
 	for (size_t i = 0; i < transactionListTransfer_.size(); i++)
 	{
 		pt.put(to_string((int)clientNumberTransfer_) + ".transactionList_." + to_string(i), transactionListTransfer_[i]);
 		pt.put(to_string((int)clientNumberTransfer_) + ".transactionListAccount_." + to_string(i), transactionListAccountTransfer_[i]);
 	}
 
-	// Enregistrement du contenu de pt dans un fichier au format JSON
+	// On sauvegarde les informations
 	ofstream file_in("bank.json");
 	write_json(file_in, pt);
 	file_in.close();
 }
 
+// Méthode qui transfère de l'argent sur un autre compte
 void BankFrame::OnTransferAccount(wxCommandEvent& event) {
-	// Show a dialog to enter the client number
+	// On affiche le pop up pour entrer le numéro de client
 	wxTextEntryDialog dialog(this, "Entrez le numéro de client :", "Transfer d'argent");
 	if (dialog.ShowModal() == wxID_OK)
 	{
-		// Get the entered client number
+		// On récupère le numéro de client
 		wxString clientNumberString = dialog.GetValue();
 		
 		double clientNumber;
 		if (clientNumberString.ToDouble(&clientNumber) && clientNumber>0 && ClientInfoTransfer(clientNumberString))
 		{
-			// The entered client number is a valid number
-			// Check if the client exists and get the list of their accounts
+			// On récupère les informations du compte sélectionné
 
-			// Show a dialog to select the account to transfer the money to
+			// On affiche le pop up pour choisir le compte
 			wxSingleChoiceDialog choiceDialog(this, "Choisissez le compte de destination :", "Transfer d'argent", accountNameTransfer_);
 			if (choiceDialog.ShowModal() == wxID_OK)
 			{
-				// Get the selected index
+				// On récupère l'indice du compte
 				int selectedIndexAccountTransfer_ = choiceDialog.GetSelection();
 
-				// Show a dialog to enter the amount to transfer
+				// On affiche le pop up pour entrer le montant
 				wxTextEntryDialog amountDialog(this, "Entrez le montant à transférer :", "Transfer d'argent");
 				if (amountDialog.ShowModal() == wxID_OK)
 				{
-					// Get the entered amount
+					// On récupère le montant à transférer
 					wxString amountString = amountDialog.GetValue();
 					double amount;
 					if (amountString.ToDouble(&amount))
 					{
-						// Check if the transfer is possible (i.e. if the amount is greater than 0 and the current account has enough balance)
 						if (amount > 0 && balance_[selectedIndexAccount_] >= amount)
 						{
-							// Perform the transfer
+							// On vérifie si le compte de départ a assez d'argent et que le montant est positif
+							
+							// On retire l'argent du compte de départ
 							balance_[selectedIndexAccount_] -= amount;
 
 							
 
-							
+							// si le nombre de transaction est au max on supprime la plus ancienne
 							if (transactionListTransfer_.GetCount() == 9999) {
 								transactionListTransfer_.RemoveAt(0);
 								transactionListAccountTransfer_.RemoveAt(0);
@@ -363,34 +382,43 @@ void BankFrame::OnTransferAccount(wxCommandEvent& event) {
 								transactionListAccount_.RemoveAt(0);
 							}
 
+							// Si les numéro de client sont différents on ajoute la transaction dans les deux listes
 							if (clientNumberTransfer_ != clientNumber_) {
+								// On ajoute la transaction dans la liste de transactions du compte de départ
 								wxString message = wxString::Format("Vous avez envoye %.2f sur le compte %s (%.0f)", amount, accountNameTransfer_[selectedIndexAccountTransfer_], clientNumberTransfer_);
 								transactionList_.Add(message);
 								transactionListAccount_.Add(selectedIndexAccount_);
 
+								// On ajoute la transaction dans la liste de transactions du compte de destination
 								message = wxString::Format("Vous avez recu %.2f de la part du compte %s (%.0f)", amount, accountName_[selectedIndexAccount_], clientNumber_);
 								transactionListTransfer_.Add(message);
 								transactionListAccountTransfer_.Add(selectedIndexAccountTransfer_);
 
+								// On ajoute l'argent au compte de destination
 								balanceTransfer_[selectedIndexAccountTransfer_] += amount;
 								
+								// On sauvegarde les informations du compte de destination
 								ClientInfoSaveTransfer();
 							}
+							// Si le numéro de client est le même on ajoute la transaction au compte de départ
 							else {
+								// On ajoute la transaction dans la liste de transactions du compte de départ
 								wxString message = wxString::Format("Vous avez envoye %.2f sur votre compte %s", amount, accountNameTransfer_[selectedIndexAccountTransfer_]);
 								transactionList_.Add(message);
 								transactionListAccount_.Add(selectedIndexAccount_);
 
+								// On ajoute la transaction dans la liste de transactions du compte de destination
 								message = wxString::Format("Vous avez recu %.2f de votre compte %s", amount, accountName_[selectedIndexAccount_]);
 								transactionList_.Add(message);
 								transactionListAccount_.Add(selectedIndexAccountTransfer_);
 
+								// On ajoute l'argent au compte de destination
 								balance_[selectedIndexAccountTransfer_] += amount;
 							}
 
 							
 
-							// Update the account display
+							// On affiche les informations du compte de départ
 							clientText2_->Show(false);
 							accountText_->Show(false);
 							balanceText_->Show(false);
@@ -404,18 +432,18 @@ void BankFrame::OnTransferAccount(wxCommandEvent& event) {
 
 							
 
-							// Show a message to confirm the transfer
+							// on affiche un message pour dire que le transfert a été effectué
 							wxMessageBox(wxString::Format("Transfer de %.2f réussi !", amount), "Transfer d'argent", wxICON_INFORMATION);
 						}
 						else
 						{
-							// The transfer is not possible, show an error message
+							// On affiche un message d'erreur si le compte de départ n'a pas assez d'argent ou si le montant est négatif
 							wxMessageBox("Impossible de réaliser le Transfer. Vérifiez que le montant est valide et que vous avez assez de solde.", "Erreur", wxICON_ERROR);
 						}
 					}
 					else
 					{
-						// The entered amount is not a valid number, show an error message
+						// On affiche un message d'erreur si le montant n'est pas valide
 						wxMessageBox("Le montant entré n'est pas valide.", "Erreur", wxICON_ERROR);
 					}
 				}
@@ -423,9 +451,10 @@ void BankFrame::OnTransferAccount(wxCommandEvent& event) {
 		}
 		else
 		{
-			// The entered client number is not a valid number, show an error message
+			// On affiche un message d'erreur si le numéro de client du compte de destination n'est pas valide
 			wxMessageBox("Le numéro de client entré n'est pas valide.", "Erreur", wxICON_ERROR);
 		}
+		// On reinitalise les variables du compte de destination
 		firstNameTransfer_ = "";
 		lastNameTransfer_ = "";
 		clientNumberTransfer_ = 0;
@@ -439,7 +468,9 @@ void BankFrame::OnTransferAccount(wxCommandEvent& event) {
 	}
 }
 
+// Méthode qui affiche les informations du client
 void BankFrame::OnChangeAccount(wxCommandEvent& event) {
+	// On cache les informations du compte
 	clientText2_->Show(false);
 	accountText_->Show(false);
 	balanceText_->Show(false);
@@ -450,6 +481,7 @@ void BankFrame::OnChangeAccount(wxCommandEvent& event) {
 	transactionButton_->Show(false);
 	changeAccountButton_->Show(false);
 
+	// On affiche les informations du client
 	ClientDisplay();
 }
 
@@ -478,9 +510,12 @@ void BankFrame::ClientDisplay() {
 	font = accountsLabel_->GetFont();
 	font.SetPointSize(14); // Changement de la taille de la police
 	accountsLabel_->SetFont(font);
+	
+	// On ajoute les comptes dans la liste
 	for (int i = 0; i < accountName_.size(); i++) {
 		accountList.Add(wxString::Format("Compte %s - Solde : %.2f", accountName_[i], balance_[i]));
 	}
+	// On crée la liste
 	accountsListBox_ = new wxListBox(panel_, wxID_ANY, wxPoint(250, 150), wxSize(300, 200), accountList, wxLB_SINGLE);
 
 	// Crée des boutons pour accéder ou supprimer le compte sélectionné, et un bouton qui permet de créer un compte
@@ -506,6 +541,7 @@ void BankFrame::OnAccessAccount(wxCommandEvent& event) {
 		return;
 	}
 
+	// On affiche les informations du compte
 	AccountDisplay();
 }
 
@@ -539,6 +575,7 @@ void BankFrame::OnDeleteAccount(wxCommandEvent& event) {
 
 		accountsListBox_->Destroy();
 
+		// On met à jour la liste des comptes
 		wxArrayString accountList;
 		for (int i = 0; i < accountName_.size(); i++) {
 			accountList.Add(wxString::Format("Compte %s - Solde : %.2f", accountName_[i], balance_[i]));
@@ -551,11 +588,11 @@ void BankFrame::OnDeleteAccount(wxCommandEvent& event) {
 
 // Création d'un compte
 void BankFrame::OnCreateAccount(wxCommandEvent& event) {
-	// Create the pop-up window
+	// On affiche un pop up de création de compte
 	wxDialog* dialog = new wxDialog(this, wxID_ANY, "Création de compte", wxDefaultPosition, wxSize(300, 200));
 	dialog->Center();
 
-	// Create the form controls
+	// Création des éléments du pop up
 	wxStaticText* accountNameLabel = new wxStaticText(dialog, wxID_ANY, "Nom du compte :", wxPoint(20, 20));
 	wxTextCtrl* accountNameField = new wxTextCtrl(dialog, wxID_ANY, "", wxPoint(20, 40), wxSize(250, -1));
 	wxStaticText* accountTypeLabel = new wxStaticText(dialog, wxID_ANY, "Type de compte :", wxPoint(20, 70));
@@ -568,48 +605,57 @@ void BankFrame::OnCreateAccount(wxCommandEvent& event) {
 
 	if (dialog->ShowModal() == wxID_OK)
 	{
-		// The user clicked the "Créer le compte" button
-		// Retrieve the form data
+		// L'utilisateur a cliqué sur le bouton "Créer le compte"
+		// On récupère les informations du pop up
 		wxString accountName = accountNameField->GetValue();
 		int accountType = accountTypeChoice->GetSelection();
 
-		// Check the form data
+		// On vérifie les informations
 		if (accountName.empty())
 		{
-			// The account name field is empty, display an error message
+			// Si le nom du compte est vide on affiche un message d'erreur
 			wxMessageBox("Veuillez entrer un nom de compte.", "Erreur", wxICON_ERROR);
 		}
 		else
 		{
-			// The form data is valid
-			// Perform additional processing here (e.g., create the account in the database)
+			// Si les données sont valides on crée le compte
 			if(accountName_.GetCount() < 100) {
-				// Add the new account to the list of accounts for the client
+				// Ajout du compte
 				accountName_.Add(accountName);
 				balance_.Add(0.0);
 				accountType_.Add(accountType);
-				// Display the newly created account
+				
 				selectedIndexAccount_ = accountName_.GetCount() - 1;
+				
+				// Si le nombre de transaction est au max on supprime la plus ancienne
+				if (transactionList_.GetCount() == 9999) {
+					transactionList_.RemoveAt(0);
+					transactionListAccount_.RemoveAt(0);
+				}
+				// Ajout de la transaction
 				transactionList_.Add("Creation du compte");
 				transactionListAccount_.Add(selectedIndexAccount_);
+
+				// Affichage du compte
 				AccountDisplay();
 			}
 			else {
+				// Si le nombre de compte est au max on affiche un message d'erreur
 				wxMessageBox("Vous êtes au nombre maximum de compte.", "Erreur", wxICON_ERROR);
 			}
 		}
 	}
 
-	// Destroy the pop-up window
+	// On ferme le pop up
 	dialog->Destroy();
 }
 
-// Déconnection
+// Méthode pour se déconnecter
 void BankFrame::OnLogout(wxCommandEvent& event) {
 	// On sauvegarde les informations
 	ClientInfoSave();
 
-	// On reset les infos
+	// On réinitialise les informations
 	firstName_ = "";
 	lastName_ = "";
 	clientNumber_ = 0;
@@ -648,28 +694,16 @@ void BankFrame::OnServer(wxCommandEvent& event)
 	{
 		// L'utilisateur a sélectionné le serveur 1
 		server_ = 1;
-		// ...
-
-		// Pour le debug, à supprimer à la fin
-		wxLogStatus("server 1");
 	}
 	else if (serverId == server2_->GetId())
 	{
 		// L'utilisateur a sélectionné le serveur 2
 		server_ = 2;
-		// ...
-
-		// Pour le debug, à supprimer à la fin
-		wxLogStatus("server 2");
 	}
 	else if (serverId == server3_->GetId())
 	{
 		// L'utilisateur a sélectionné le serveur 3
 		server_ = 3;
-		// ...
-
-		// Pour le debug, à supprimer à la fin
-		wxLogStatus("server 3");
 	}
 
 	// On masque les éléments de la fenêtre
@@ -688,6 +722,7 @@ void BankFrame::Connexion(wxCommandEvent& event)
 	// On crée le pop up
 	wxDialog* dialog = new wxDialog(this, wxID_ANY, "Connection", wxDefaultPosition, wxSize(300, 200));
 	dialog->Center();
+	
 	// On crée les contrôles du formulaire
 	wxStaticText* clientLabel = new wxStaticText(dialog, wxID_ANY, "Numéro client :", wxPoint(20, 20));
 	wxTextCtrl* clientField = new wxTextCtrl(dialog, wxID_ANY, "", wxPoint(20, 40), wxSize(250, -1));
@@ -712,9 +747,6 @@ void BankFrame::Connexion(wxCommandEvent& event)
 		else
 		{
 			// Les données du formulaire sont valides
-			// ...
-
-			// Pour le debug, à modifier à la fin
 			bool test = ClientInfo(clientNumber, password);
 			if (test) {
 
@@ -723,6 +755,7 @@ void BankFrame::Connexion(wxCommandEvent& event)
 
 			}
 			else {
+				// On affiche un message d'erreur
 				wxMessageBox("Les identifiants sont invalides", "Erreur", wxICON_ERROR);
 			}
 			
@@ -733,13 +766,16 @@ void BankFrame::Connexion(wxCommandEvent& event)
 	dialog->Destroy();
 }
 
+// Méthode qui génère un numéro de client
 int BankFrame::GenerateClientNumber()
 {
+	// On génère un numéro de client aléatoire entre 100000 et 999999
 	bool ok = false;
 	while(true){
 		std::random_device rd;
 		std::mt19937 gen(rd());
 		std::uniform_int_distribution<> dis(100000, 999999);
+		// On vérifie que le numéro de client n'existe pas déjà
 		ok = IsPresent(dis(gen));
 		if(ok){
 			return dis(gen);
@@ -747,8 +783,11 @@ int BankFrame::GenerateClientNumber()
 	}	
 }
 
+// Fonction qui vérifie si une numéro de client existe déjà
 bool BankFrame::IsPresent(int clientNumber) {
 	boost::property_tree::ptree pt;
+
+	// On lit le fichier JSON
 	try {
 		read_json("bank.json", pt);
 	}
@@ -756,14 +795,15 @@ bool BankFrame::IsPresent(int clientNumber) {
 		wxMessageBox(e.what(), "Erreur", wxOK | wxICON_ERROR);
 	}
 
-	if (pt.count(to_string(clientNumber)) == 0) // vérifie que le numéro de client n'existe pas dans le fichier json
+	// On parcourt les clients
+	if (pt.count(to_string(clientNumber)) == 0) // On vérifie que le numéro de client n'existe pas dans le fichier json
 	{
 		return true;
 	}
 	return false;
 }
 
-// Lorsque l'on veut créer un compte
+// Méthode qui gère la création d'un compte
 void BankFrame::Creation(wxCommandEvent& event)
 {
 	// On crée le pop up
@@ -806,7 +846,7 @@ void BankFrame::Creation(wxCommandEvent& event)
 		}
 		else
 		{
-			
+			// On récupère les infos du client
 			firstName_ = firstName;
 			lastName_ = lastName;
 			address_ = address;
@@ -815,6 +855,12 @@ void BankFrame::Creation(wxCommandEvent& event)
 			accountName_.Add("Epargne");
 			accountType_.Add(0);
 			balance_.Add(0);
+
+			// Si le nombre de transaction est au max on supprime la première transaction
+			if (transactionList_.GetCount() == 9999) {
+				transactionList_.RemoveAt(0);
+				transactionListAccount_.RemoveAt(0);
+			}
 			transactionList_.Add("Creation du compte");
 			transactionListAccount_.Add(0);
 
@@ -824,8 +870,6 @@ void BankFrame::Creation(wxCommandEvent& event)
 
 			// On affiche le compte client
 			ClientDisplay();
-
-			wxLogStatus("compte créé avec succès");
 		}
 	}
 
@@ -833,8 +877,11 @@ void BankFrame::Creation(wxCommandEvent& event)
 	dialog->Destroy();
 }
 
+// Méthode qui récupère les infos du client
 bool BankFrame::ClientInfo(wxString clientNumber, wxString password) {
 	boost::property_tree::ptree pt;
+
+	// On lit le fichier JSON
 	try {
 		read_json("bank.json", pt);
 	}
@@ -842,25 +889,28 @@ bool BankFrame::ClientInfo(wxString clientNumber, wxString password) {
 		wxMessageBox(e.what(), "Erreur", wxOK | wxICON_ERROR);
 	}
 
-	if (pt.count(clientNumber.ToStdString()) == 0) // vérifie que le numéro de client existe dans le fichier json
+	// On parcourt les clients
+	if (pt.count(clientNumber.ToStdString()) == 0) // on vérifie que le numéro de client existe dans le fichier json
 	{
 		return false;
 	}
 
+	// On compare le mot de passe
 	password_ = pt.get<std::string>(clientNumber.ToStdString() + ".password_");
 	if (password != password_) // vérifie que le mot de passe est correct
 	{
 		password_ = "";
 		return false;
 	}
-	// récupère les infos du client et les stocke dans les attributs de la classe
+	
+	// On récupère les infos du client et les stocke dans les attributs de la classe
 	firstName_ = pt.get<std::string>(clientNumber.ToStdString() + ".firstname_");
 	lastName_ = pt.get<std::string>(clientNumber.ToStdString() + ".lastName_");
 	address_ = pt.get<std::string>(clientNumber.ToStdString() + ".address_");
 	password_ = pt.get<std::string>(clientNumber.ToStdString() + ".password_");
 	clientNumber.ToDouble(&clientNumber_);
 
-	// récupère les infos des comptes du client et les stocke dans les wxArray correspondants
+	// On récupère les infos des comptes du client et les stocke dans les wxArray correspondants
 	for (auto& account : pt.get_child(clientNumber.ToStdString() + ".accountName_"))
 	{
 		accountName_.Add(account.second.data());
@@ -868,7 +918,7 @@ bool BankFrame::ClientInfo(wxString clientNumber, wxString password) {
 		balance_.Add(std::stod(pt.get<std::string>(clientNumber.ToStdString() + ".balance_." + account.first)));
 	}
 
-	// récupère les infos des transactions du client et les stocke dans les wxArray correspondants
+	// On récupère les infos des transactions du client et les stocke dans les wxArray correspondants
 	for (auto& transaction : pt.get_child(clientNumber.ToStdString() + ".transactionList_"))
 	{
 		transactionList_.Add(transaction.second.data());
@@ -878,14 +928,17 @@ bool BankFrame::ClientInfo(wxString clientNumber, wxString password) {
 	return true;
 }
 
+// Méthode qui sauvegarde les infos du client
 void BankFrame::ClientInfoSave() {
 
 	boost::property_tree::ptree pt;
 
+	// On lit le fichier JSON
 	ifstream file_out("bank.json");
 	if (file_out.good()) {
 		try {
 			read_json("bank.json", pt);
+			// On supprime les infos du client
 			pt.erase(to_string((int)clientNumber_));
 		}
 		catch (const std::exception& e) {
@@ -920,12 +973,13 @@ void BankFrame::ClientInfoSave() {
 	
 }
 
+// Méthode qui gère la fermeture de la fenêtre
 void BankFrame::OnClose(wxCloseEvent& evt) {
+	// On sauvegarde les infos du client s'il est connecté
 	if(!welcome_->IsShown()){
-		// On sauvegarde les données
 		ClientInfoSave();
 	}
-	// Pour pouvoir fermer la fenêtre
+	// On ferme la fenêtre
 	evt.Skip();
 }
 

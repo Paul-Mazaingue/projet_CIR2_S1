@@ -11,7 +11,8 @@ class BankFrame : public wxFrame
 public:
 	// Constructeur
 	BankFrame(const wxString& title);
-
+	
+private:
 	// Lorsqu'un serveur est sélectionné
 	void OnServer(wxCommandEvent& event);
 
@@ -27,37 +28,76 @@ public:
 	// On affiche la fenêtre du compte client
 	void AccountDisplay();
 
+	// On affiche la fenêtre du compte client
 	void BankFrame::OnAccessAccount(wxCommandEvent& event);
+
+	// Méthode qui supprime un compte
 	void BankFrame::OnDeleteAccount(wxCommandEvent& event);
+	
+	// Méthode qui créé un compte
 	void BankFrame::OnCreateAccount(wxCommandEvent& event);
+	
+	// Méthode pour se déconnecter
 	void BankFrame::OnLogout(wxCommandEvent& event);
+
+	// Liste des comptes
 	wxListBox* accountsListBox_;
+	
+	// Bouton page client
 	wxButton* accessAccountButton_;
 	wxButton* deleteAccountButton_;
 	wxButton* createAccountButton_;
 	wxButton* logoutButton_;
+
+	// texte page client
 	wxStaticText* clientAdressText_;
 	wxStaticText* clientText_;
+	wxStaticText* accountsLabel_;
+	
+	// Indice du compte sélectionné
 	int selectedIndexAccount_;
+	
+	// Texte page compte
 	wxStaticText* clientText2_;
 	wxStaticText* accountText_;
 	wxStaticText* balanceText_;
 	wxStaticText* rateText_;
+	
+	// Bouton page compte
 	wxButton* addButton_;
 	wxButton* withdrawButton_;
 	wxButton* TransferButton_;
 	wxButton* transactionButton_;
 	wxButton* changeAccountButton_;
+
+	// Méthode pour revenir à la page client
 	void OnChangeAccount(wxCommandEvent& event);
+	
+	// Méthode pour ajouter de l'argent
 	void BankFrame::OnAddAccount(wxCommandEvent& event);
+
+	// Méthode pour retirer de l'argent
 	void BankFrame::OnWithdrawAccount(wxCommandEvent& event);
+	
+	// Méthode pour faire un virement
 	void BankFrame::OnTransferAccount(wxCommandEvent& event);
+	
+	// Méthode pour générer un numéro de client
 	int BankFrame::GenerateClientNumber();
+
+	// Méthode pour récupèrer les info d'un client
 	bool BankFrame::ClientInfo(wxString clientNumber, wxString password_);
+
+	// Méthode pour sauvegarder les informations d'un client
 	void BankFrame::ClientInfoSave();
-	wxStaticText* accountsLabel_;
+
+	// Méthode pour afficher la liste des transactions d'un compte
 	void BankFrame::OnTransactionAccount(wxCommandEvent& event);
+	
+	// Méthode pour récupèrer les info d'un compte pour le transfert
 	bool BankFrame::ClientInfoTransfer(wxString clientNumber);
+	
+	// Donnée du compte pour le transfert
 	wxString firstNameTransfer_;
 	wxString lastNameTransfer_;
 	wxString addressTransfer_;
@@ -69,10 +109,16 @@ public:
 	wxArrayString transactionListTransfer_;
 	wxArrayInt transactionListAccountTransfer_;
 	int selectedIndexAccountTransfer_;
+
+	// Méthode pour sauvegarder les information du compte pour le transfert
 	void BankFrame::ClientInfoSaveTransfer();
+	
+	// Méthode qui gère la fermeture de la fenêtre
 	void BankFrame::OnClose(wxCloseEvent& evt);
+
+	// Méthode qui vérifie si un numéro de client existe
 	bool BankFrame::IsPresent(int clientNumber);
-private:
+
 	// Variable du client
 	wxString firstName_;
 	wxString lastName_;
