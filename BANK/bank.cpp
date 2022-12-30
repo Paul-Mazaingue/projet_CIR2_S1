@@ -1,79 +1,9 @@
 ﻿#include "bank.h"
 
 using namespace std;
-//fonctions de sockets
-int receiveint(tcp::socket& socket) {
-	int n;
-	boost::asio::mutable_buffer buffer = boost::asio::buffer(&n, sizeof(n));
-	std::size_t bytes_transferred = 0;
-	boost::system::error_code error;
-	while (bytes_transferred < sizeof(n)) {
-		bytes_transferred += boost::asio::read(socket, buffer, boost::asio::transfer_all(), error);
-		if (error) {
-			// Gérer l'erreur
-			return 0;
-		}
-		buffer = buffer + bytes_transferred;
-	}
-	int result = *static_cast<int*>(buffer.data());
-	return result;
-}
 
-string read_(tcp::socket& socket) {
-	boost::asio::streambuf buf;
-	boost::asio::read_until(socket, buf, "\n");
-	string data = boost::asio::buffer_cast<const char*>(buf.data());
-	return data;
-}
-
-int* receivetabint(tcp::socket& socket, int size) {
-	int* tab = new int[size];
-	boost::asio::mutable_buffer buffer = boost::asio::buffer(tab, size * sizeof(int));
-	boost::system::error_code error;
-	std::size_t bytes_transferred = 0;
-	while (bytes_transferred < size * sizeof(int)) {
-		bytes_transferred += boost::asio::read(socket, buffer, boost::asio::transfer_all(), error);
-		if (error) {
-			// Gérer l'erreur
-			return nullptr;
-		}
-		buffer = buffer + bytes_transferred;
-	}
-	return tab;
-}
-string* receivetabstring(tcp::socket& socket, int size) {
-	string* tab = new string[size];
-	boost::asio::mutable_buffer buffer = boost::asio::buffer(tab, size * sizeof(string));
-	boost::system::error_code error;
-	std::size_t bytes_transferred = 0;
-	while (bytes_transferred < size * sizeof(string)) {
-		bytes_transferred += boost::asio::read(socket, buffer, boost::asio::transfer_all(), error);
-		if (error) {
-			// Gérer l'erreur
-			return nullptr;
-		}
-		buffer = buffer + bytes_transferred;
-	}
-	return tab;
-}
-
-double* receivetabdouble(tcp::socket& socket, int size) {
-	double* tab = new double[size];
-	boost::asio::mutable_buffer buffer = boost::asio::buffer(tab, size * sizeof(double));
-	boost::system::error_code error;
-	std::size_t bytes_transferred = 0;
-	while (bytes_transferred < size * sizeof(double)) {
-		bytes_transferred += boost::asio::read(socket, buffer, boost::asio::transfer_all(), error);
-		if (error) {
-			// Gérer l'erreur
-			return nullptr;
-		}
-		buffer = buffer + bytes_transferred;
-	}
-	return tab;
-}
 // Fenêtre de la banque
-BankFrame::BankFrame(const wxString& title): wxFrame(nullptr, wxID_ANY, title)
+BankFrame::BankFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title)
 {
 	// Initialisation par défaut
 	rate_ = 0;
@@ -103,17 +33,17 @@ BankFrame::BankFrame(const wxString& title): wxFrame(nullptr, wxID_ANY, title)
 	passwordTransfer_ = "";
 	clientNumberTransfer_ = 0;
 	selectedIndexAccountTransfer_ = -1;
-	
+
 	// Panneau sur lequel on va mettre les élements
 	panel_ = new wxPanel(this);
-	
+
 	// Message de bienvenue 
 	welcome_ = new wxStaticText(panel_, wxID_ANY, "Bienvenue dans votre banque en ligne,\nvotre partenaire financier de confiance.", wxPoint(100, 100), wxSize(600, -1), wxALIGN_CENTER_HORIZONTAL);
 	// Changement de la taille de la police
 	wxFont font = welcome_->GetFont();
 	font.SetPointSize(24);
 	welcome_->SetFont(font);
-	
+
 	// Boutons afin de choisir le serveur
 	server1_ = new wxButton(panel_, wxID_ANY, "Paris", wxPoint(100, 275), wxSize(150, 50));
 	server2_ = new wxButton(panel_, wxID_ANY, "Londre", wxPoint(325, 275), wxSize(150, 50));
@@ -153,28 +83,28 @@ void BankFrame::AccountDisplay() {
 
 	wxString accountText = wxString::Format("Nom du compte : %s", accountName_[selectedIndexAccount_]);
 	accountText_ = new wxStaticText(panel_, wxID_ANY, accountText, wxPoint(200, 110), wxSize(400, -1), wxALIGN_CENTER);
-	
+
 	wxString balanceText = wxString::Format("Solde : %.2f", balance_[selectedIndexAccount_]);
 	balanceText_ = new wxStaticText(panel_, wxID_ANY, balanceText, wxPoint(200, 200), wxSize(400, -1), wxALIGN_CENTER);
 
 	wxString rateText = wxString::Format("Taux : %.2f", rate_);
 	rateText_ = new wxStaticText(panel_, wxID_ANY, rateText, wxPoint(600, 30), wxSize(200, -1), wxALIGN_CENTER);
-	
+
 	// On redéfinie la taille des texte
 	wxFont font = clientText2_->GetFont();
-	font.SetPointSize(12); 
+	font.SetPointSize(12);
 	clientText2_->SetFont(font);
 
 	font = accountText_->GetFont();
-	font.SetPointSize(18); 
+	font.SetPointSize(18);
 	accountText_->SetFont(font);
 
 	font = balanceText_->GetFont();
-	font.SetPointSize(18); 
+	font.SetPointSize(18);
 	balanceText_->SetFont(font);
 
 	font = rateText_->GetFont();
-	font.SetPointSize(18); 
+	font.SetPointSize(18);
 	rateText_->SetFont(font);
 
 	// Si le compte est un compte épargne on affiche le taux
@@ -207,10 +137,10 @@ void BankFrame::OnTransactionAccount(wxCommandEvent& event)
 	wxListBox* transactionListBox = new wxListBox(dialog, wxID_ANY, wxPoint(20, 20), wxSize(360, 340));
 
 	// Remplit la liste des transactions
-	for (int i = transactionList_.size()-1; i >= 0; i--)
+	for (int i = transactionList_.size() - 1; i >= 0; i--)
 	{
-		if(transactionListAccount_[i] == selectedIndexAccount_){
-			transactionListBox->Append(transactionList_[i]);	
+		if (transactionListAccount_[i] == selectedIndexAccount_) {
+			transactionListBox->Append(transactionList_[i]);
 		}
 	}
 
@@ -232,9 +162,9 @@ void BankFrame::OnAddAccount(wxCommandEvent& event) {
 		double amount;
 		if (amountString.ToDouble(&amount) && amount > 0)
 		{
-			if(balance_[selectedIndexAccount_] + amount < 1000000000) {
+			if (balance_[selectedIndexAccount_] + amount < 1000000000) {
 				// Si le montant est valide on ajoute l'argent
-				balance_[selectedIndexAccount_] += amount; 
+				balance_[selectedIndexAccount_] += amount;
 
 				// On met à jour le solde
 				wxString balanceText = wxString::Format("Solde : %.2f", balance_[selectedIndexAccount_]);
@@ -242,13 +172,13 @@ void BankFrame::OnAddAccount(wxCommandEvent& event) {
 
 				// On ajoute la transaction à la liste
 				wxString transaction = wxString::Format("Ajout de %.2f", amount);
-				
+
 				// Si on est au max de transactions on supprime la plus ancienne
-				if (transactionList_.GetCount() == 999) {
+				if (transactionList_.GetCount() == 9999) {
 					transactionList_.RemoveAt(0);
 					transactionListAccount_.RemoveAt(0);
 				}
-				
+
 				transactionList_.Add(transaction);
 				transactionListAccount_.Add(selectedIndexAccount_);
 			}
@@ -292,9 +222,9 @@ void BankFrame::OnWithdrawAccount(wxCommandEvent& event) {
 
 				// On ajoute la transaction à la liste
 				wxString transaction = wxString::Format("Retrait de %.2f", amount);
-				
+
 				// Si on est au max de transactions on supprime la plus ancienne
-				if (transactionList_.GetCount() == 999) {
+				if (transactionList_.GetCount() == 9999) {
 					transactionList_.RemoveAt(0);
 					transactionListAccount_.RemoveAt(0);
 				}
@@ -313,9 +243,9 @@ void BankFrame::OnWithdrawAccount(wxCommandEvent& event) {
 
 // Méthode qui récupère les infos du compte qui reçois l'argent
 bool BankFrame::ClientInfoTransfer(wxString clientNumber) {
-	
+
 	boost::property_tree::ptree pt;
-	
+
 	// On lit le fichier json
 	try {
 		read_json("bank.json", pt);
@@ -330,7 +260,7 @@ bool BankFrame::ClientInfoTransfer(wxString clientNumber) {
 		return false;
 	}
 
-	
+
 	// On récupère les informations du client
 	firstNameTransfer_ = pt.get<std::string>(clientNumber.ToStdString() + ".firstname_");
 	lastNameTransfer_ = pt.get<std::string>(clientNumber.ToStdString() + ".lastName_");
@@ -345,7 +275,7 @@ bool BankFrame::ClientInfoTransfer(wxString clientNumber) {
 		accountTypeTransfer_.Add(std::stoi(pt.get<std::string>(clientNumber.ToStdString() + ".accountType_." + account.first)));
 		balanceTransfer_.Add(std::stod(pt.get<std::string>(clientNumber.ToStdString() + ".balance_." + account.first)));
 	}
-	
+
 
 	// On récupère les informations des transactions
 	for (auto& transaction : pt.get_child(clientNumber.ToStdString() + ".transactionList_"))
@@ -353,7 +283,7 @@ bool BankFrame::ClientInfoTransfer(wxString clientNumber) {
 		transactionListTransfer_.Add(transaction.second.data());
 		transactionListAccountTransfer_.Add(std::stoi(pt.get<std::string>(clientNumber.ToStdString() + ".transactionListAccount_." + transaction.first)));
 	}
-	
+
 	return true;
 }
 
@@ -361,7 +291,7 @@ bool BankFrame::ClientInfoTransfer(wxString clientNumber) {
 void BankFrame::ClientInfoSaveTransfer() {
 	boost::property_tree::ptree pt;
 
-	
+
 	ifstream file_out("bank.json");
 	// Si le fichier existe on le lit
 	if (file_out.good()) {
@@ -375,7 +305,7 @@ void BankFrame::ClientInfoSaveTransfer() {
 		}
 	}
 
-	
+
 	// Ajout des informations du client
 	pt.put(to_string((int)clientNumberTransfer_) + ".firstname_", firstNameTransfer_);
 	pt.put(to_string((int)clientNumberTransfer_) + ".lastName_", lastNameTransfer_);
@@ -411,9 +341,9 @@ void BankFrame::OnTransferAccount(wxCommandEvent& event) {
 	{
 		// On récupère le numéro de client
 		wxString clientNumberString = dialog.GetValue();
-		
+
 		double clientNumber;
-		if (clientNumberString.ToDouble(&clientNumber) && clientNumber>0 && ClientInfoTransfer(clientNumberString))
+		if (clientNumberString.ToDouble(&clientNumber) && clientNumber > 0 && ClientInfoTransfer(clientNumberString))
 		{
 			// On récupère les informations du compte sélectionné
 
@@ -436,18 +366,18 @@ void BankFrame::OnTransferAccount(wxCommandEvent& event) {
 						if (amount > 0 && balance_[selectedIndexAccount_] >= amount)
 						{
 							// On vérifie si le compte de départ a assez d'argent et que le montant est positif
-							
+
 							// On retire l'argent du compte de départ
 							balance_[selectedIndexAccount_] -= amount;
 
-							
+
 
 							// si le nombre de transaction est au max on supprime la plus ancienne
-							if (transactionListTransfer_.GetCount() == 999) {
+							if (transactionListTransfer_.GetCount() == 9999) {
 								transactionListTransfer_.RemoveAt(0);
 								transactionListAccountTransfer_.RemoveAt(0);
 							}
-							if (transactionList_.GetCount() == 999) {
+							if (transactionList_.GetCount() == 9999) {
 								transactionList_.RemoveAt(0);
 								transactionListAccount_.RemoveAt(0);
 							}
@@ -466,7 +396,7 @@ void BankFrame::OnTransferAccount(wxCommandEvent& event) {
 
 								// On ajoute l'argent au compte de destination
 								balanceTransfer_[selectedIndexAccountTransfer_] += amount;
-								
+
 								// On sauvegarde les informations du compte de destination
 								ClientInfoSaveTransfer();
 							}
@@ -486,7 +416,7 @@ void BankFrame::OnTransferAccount(wxCommandEvent& event) {
 								balance_[selectedIndexAccountTransfer_] += amount;
 							}
 
-							
+
 
 							// On affiche les informations du compte de départ
 							clientText2_->Show(false);
@@ -500,7 +430,7 @@ void BankFrame::OnTransferAccount(wxCommandEvent& event) {
 							changeAccountButton_->Show(false);
 							AccountDisplay();
 
-							
+
 
 							// on affiche un message pour dire que le transfert a été effectué
 							wxMessageBox(wxString::Format("Transfer de %.2f réussi !", amount), "Transfer d'argent", wxICON_INFORMATION);
@@ -572,7 +502,7 @@ void BankFrame::ClientDisplay() {
 	// Affiche l'adresse du client
 	wxString clientAdressText = wxString::Format("Adresse : %s", address_);
 	clientAdressText_ = new wxStaticText(panel_, wxID_ANY, clientAdressText, wxPoint(20, 100), wxSize(150, -1));
-	
+
 
 	// Crée une liste avec les comptes du client
 	wxArrayString accountList;
@@ -580,7 +510,7 @@ void BankFrame::ClientDisplay() {
 	font = accountsLabel_->GetFont();
 	font.SetPointSize(14); // Changement de la taille de la police
 	accountsLabel_->SetFont(font);
-	
+
 	// On ajoute les comptes dans la liste
 	for (int i = 0; i < accountName_.size(); i++) {
 		accountList.Add(wxString::Format("Compte %s - Solde : %.2f", accountName_[i], balance_[i]));
@@ -689,16 +619,16 @@ void BankFrame::OnCreateAccount(wxCommandEvent& event) {
 		else
 		{
 			// Si les données sont valides on crée le compte
-			if(accountName_.GetCount() < 100) {
+			if (accountName_.GetCount() < 100) {
 				// Ajout du compte
 				accountName_.Add(accountName);
 				balance_.Add(0.0);
 				accountType_.Add(accountType);
-				
+
 				selectedIndexAccount_ = accountName_.GetCount() - 1;
-				
+
 				// Si le nombre de transaction est au max on supprime la plus ancienne
-				if (transactionList_.GetCount() == 999) {
+				if (transactionList_.GetCount() == 9999) {
 					transactionList_.RemoveAt(0);
 					transactionListAccount_.RemoveAt(0);
 				}
@@ -792,7 +722,7 @@ void BankFrame::Connexion(wxCommandEvent& event)
 	// On crée le pop up
 	wxDialog* dialog = new wxDialog(this, wxID_ANY, "Connection", wxDefaultPosition, wxSize(300, 200));
 	dialog->Center();
-	
+
 	// On crée les contrôles du formulaire
 	wxStaticText* clientLabel = new wxStaticText(dialog, wxID_ANY, "Numéro client :", wxPoint(20, 20));
 	wxTextCtrl* clientField = new wxTextCtrl(dialog, wxID_ANY, "", wxPoint(20, 40), wxSize(250, -1));
@@ -828,7 +758,7 @@ void BankFrame::Connexion(wxCommandEvent& event)
 				// On affiche un message d'erreur
 				wxMessageBox("Les identifiants sont invalides", "Erreur", wxICON_ERROR);
 			}
-			
+
 		}
 	}
 
@@ -839,18 +769,18 @@ void BankFrame::Connexion(wxCommandEvent& event)
 // Méthode qui génère un numéro de client
 int BankFrame::GenerateClientNumber()
 {
-	// On génère un numéro de client aléatoire entre 100000 et 99999
+	// On génère un numéro de client aléatoire entre 100000 et 999999
 	bool ok = false;
-	while(true){
+	while (true) {
 		std::random_device rd;
 		std::mt19937 gen(rd());
-		std::uniform_int_distribution<> dis(100000, 99999);
+		std::uniform_int_distribution<> dis(100000, 999999);
 		// On vérifie que le numéro de client n'existe pas déjà
 		ok = IsPresent(dis(gen));
-		if(ok){
+		if (ok) {
 			return dis(gen);
 		}
-	}	
+	}
 }
 
 // Fonction qui vérifie si une numéro de client existe déjà
@@ -921,7 +851,7 @@ void BankFrame::Creation(wxCommandEvent& event)
 		}
 		else
 		{
-			
+
 			// On récupère les infos du client
 			firstName_ = firstName;
 			lastName_ = lastName;
@@ -934,12 +864,12 @@ void BankFrame::Creation(wxCommandEvent& event)
 
 			// Si le nombre de transaction est au max on supprime la première transaction
 
-	       
-			if (transactionList_.GetCount() == 999) {
+
+			if (transactionList_.GetCount() == 9999) {
 				transactionList_.RemoveAt(0);
 				transactionListAccount_.RemoveAt(0);
 			}
-			
+
 			transactionList_.Add("Creation du compte");
 			transactionListAccount_.Add(0);
 
@@ -958,77 +888,57 @@ void BankFrame::Creation(wxCommandEvent& event)
 
 // Méthode qui récupère les infos du client
 bool BankFrame::ClientInfo(wxString clientNumber, wxString password) {
-	boost::asio::io_service io_service;
-	//socket creation
-	tcp::socket socket(io_service);
-	if (server_ == 1) {
-		socket.connect(tcp::endpoint(boost::asio::ip::address::from_string("127.0.0.1"), 1234));
-	}
-	boost::system::error_code error;
-	boost::asio::write(socket, boost::asio::buffer(&clientNumber_, sizeof(clientNumber_)), error);
-	std::this_thread::sleep_for(std::chrono::milliseconds(100));
-	int server_ = receiveint(socket);
+	boost::property_tree::ptree pt;
 
-	if (server_ == 0) {
+	// Si le fichier n'existe pas, on affiche une erreur
+	std::ifstream file("bank.json");
+	if (!file.good()) {
 		return false;
 	}
-		
-	
-	string lastname_ = read_(socket);
 
-	string firstname_ = read_(socket);
 
-	string address_ = read_(socket);
-	
+	// On lit le fichier JSON
+	try {
+		read_json("bank.json", pt);
+	}
+	catch (const std::exception& e) {
+		wxMessageBox(e.what(), "Erreur", wxOK | wxICON_ERROR);
+	}
+
+	// On parcourt les clients
+	if (pt.count(clientNumber.ToStdString()) == 0) // on vérifie que le numéro de client existe dans le fichier json
+	{
+		return false;
+	}
+
 	// On compare le mot de passe
-	string password_ = read_(socket);
-
-	if (password.ToStdString() != password_) // vérifie que le mot de passe est correct
+	password_ = pt.get<std::string>(clientNumber.ToStdString() + ".password_");
+	if (password != password_) // vérifie que le mot de passe est correct
 	{
 		password_ = "";
-			return false;
+		return false;
 	}
-		
+
+	// On récupère les infos du client et les stocke dans les attributs de la classe
+	firstName_ = pt.get<std::string>(clientNumber.ToStdString() + ".firstname_");
+	lastName_ = pt.get<std::string>(clientNumber.ToStdString() + ".lastName_");
+	address_ = pt.get<std::string>(clientNumber.ToStdString() + ".address_");
+	password_ = pt.get<std::string>(clientNumber.ToStdString() + ".password_");
 	clientNumber.ToDouble(&clientNumber_);
 
-		
-	string* accountName = receivetabstring(socket, 100);
-	int* AccType = receivetabint(socket, 100);
-	double* balance = receivetabdouble(socket, 100);
-		
-	int count = 0;
-	for (int i = 0; i < 100; i++)
+	// On récupère les infos des comptes du client et les stocke dans les wxArray correspondants
+	for (auto& account : pt.get_child(clientNumber.ToStdString() + ".accountName_"))
 	{
-		if (accountName_[i] != "")
-		{
-			count++;
-		}
+		accountName_.Add(account.second.data());
+		accountType_.Add(std::stoi(pt.get<std::string>(clientNumber.ToStdString() + ".accountType_." + account.first)));
+		balance_.Add(std::stod(pt.get<std::string>(clientNumber.ToStdString() + ".balance_." + account.first)));
 	}
 
-	for(int i = 0; i < count ; i++)
+	// On récupère les infos des transactions du client et les stocke dans les wxArray correspondants
+	for (auto& transaction : pt.get_child(clientNumber.ToStdString() + ".transactionList_"))
 	{
-		accountName_.Add(accountName[i]);
-		accountType_.Add(AccType[i]);
-		balance_.Add(balance[i]);
-	}
-
-		
-	string* transList = receivetabstring(socket, 1000);
-	int* transListAcc = receivetabint(socket, 1000);
-
-	count = 0;
-	for (int i = 0; i < 1000; i++)
-	{
-		if (transList[i] != "")
-		{
-			count++;
-		}
-	}
-
-	for (int i = 0; i < count; i++)
-	{
-		transactionList_.Add(transList[i]);
-		transactionListAccount_.Add(transListAcc[i]);	
+		transactionList_.Add(transaction.second.data());
+		transactionListAccount_.Add(std::stoi(pt.get<std::string>(clientNumber.ToStdString() + ".transactionListAccount_." + transaction.first)));
 	}
 
 	return true;
@@ -1053,7 +963,7 @@ void BankFrame::ClientInfoSave() {
 	}
 
 	// Ajout des informations du client dans la variable pt
-	
+
 	pt.put(to_string((int)clientNumber_) + ".firstname_", firstName_);
 	pt.put(to_string((int)clientNumber_) + ".lastName_", lastName_);
 	pt.put(to_string((int)clientNumber_) + ".password_", password_);
@@ -1065,7 +975,7 @@ void BankFrame::ClientInfoSave() {
 		pt.put(to_string((int)clientNumber_) + ".accountType_." + to_string(i), accountType_[i]);
 		pt.put(to_string((int)clientNumber_) + ".balance_." + to_string(i), balance_[i]);
 	}
-	
+
 	for (size_t i = 0; i < transactionList_.size(); i++)
 	{
 		pt.put(to_string((int)clientNumber_) + ".transactionList_." + to_string(i), transactionList_[i]);
@@ -1076,13 +986,13 @@ void BankFrame::ClientInfoSave() {
 	ofstream file_in("bank.json");
 	write_json(file_in, pt);
 	file_in.close();
-	
+
 }
 
 // Méthode qui gère la fermeture de la fenêtre
 void BankFrame::OnClose(wxCloseEvent& evt) {
 	// On sauvegarde les infos du client s'il est connecté
-	if(!welcome_->IsShown()){
+	if (!welcome_->IsShown()) {
 		ClientInfoSave();
 	}
 	// On ferme la fenêtre

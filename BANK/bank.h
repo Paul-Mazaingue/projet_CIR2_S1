@@ -5,42 +5,13 @@
 #include <boost/property_tree/json_parser.hpp>
 #include <fstream>
 
-
-#include <queue>
-#include <random>
-#include <chrono>
-#include <optional>
-#include <boost/asio.hpp>
-#include <boost/system/error_code.hpp>
-#include <string>
-#include <memory>
-#include <vector>
-#include <boost/archive/text_oarchive.hpp>
-#include <boost/archive/text_iarchive.hpp>
-#include <boost/serialization/serialization.hpp>
-
-using std::string;
-using std::to_string;
-using std::vector;
-using std::queue;
-using std::cin;
-using std::cout;
-using std::endl;
-using std::ostream;
-using std::random_device;
-using std::default_random_engine;
-using std::uniform_int_distribution;
-using namespace std::chrono_literals;
-using boost::asio::ip::tcp;
-using boost::asio::read;
-using boost::system::error_code;
 // Fenêtre de la banque
 class BankFrame : public wxFrame
 {
 public:
 	// Constructeur
 	BankFrame(const wxString& title);
-	
+
 private:
 	// Lorsqu'un serveur est sélectionné
 	void OnServer(wxCommandEvent& event);
@@ -62,16 +33,16 @@ private:
 
 	// Méthode qui supprime un compte
 	void BankFrame::OnDeleteAccount(wxCommandEvent& event);
-	
+
 	// Méthode qui créé un compte
 	void BankFrame::OnCreateAccount(wxCommandEvent& event);
-	
+
 	// Méthode pour se déconnecter
 	void BankFrame::OnLogout(wxCommandEvent& event);
 
 	// Liste des comptes
 	wxListBox* accountsListBox_;
-	
+
 	// Bouton page client
 	wxButton* accessAccountButton_;
 	wxButton* deleteAccountButton_;
@@ -82,16 +53,16 @@ private:
 	wxStaticText* clientAdressText_;
 	wxStaticText* clientText_;
 	wxStaticText* accountsLabel_;
-	
+
 	// Indice du compte sélectionné
 	int selectedIndexAccount_;
-	
+
 	// Texte page compte
 	wxStaticText* clientText2_;
 	wxStaticText* accountText_;
 	wxStaticText* balanceText_;
 	wxStaticText* rateText_;
-	
+
 	// Bouton page compte
 	wxButton* addButton_;
 	wxButton* withdrawButton_;
@@ -101,16 +72,16 @@ private:
 
 	// Méthode pour revenir à la page client
 	void OnChangeAccount(wxCommandEvent& event);
-	
+
 	// Méthode pour ajouter de l'argent
 	void BankFrame::OnAddAccount(wxCommandEvent& event);
 
 	// Méthode pour retirer de l'argent
 	void BankFrame::OnWithdrawAccount(wxCommandEvent& event);
-	
+
 	// Méthode pour faire un virement
 	void BankFrame::OnTransferAccount(wxCommandEvent& event);
-	
+
 	// Méthode pour générer un numéro de client
 	int BankFrame::GenerateClientNumber();
 
@@ -122,10 +93,10 @@ private:
 
 	// Méthode pour afficher la liste des transactions d'un compte
 	void BankFrame::OnTransactionAccount(wxCommandEvent& event);
-	
+
 	// Méthode pour récupèrer les info d'un compte pour le transfert
 	bool BankFrame::ClientInfoTransfer(wxString clientNumber);
-	
+
 	// Donnée du compte pour le transfert
 	wxString firstNameTransfer_;
 	wxString lastNameTransfer_;
@@ -141,7 +112,7 @@ private:
 
 	// Méthode pour sauvegarder les information du compte pour le transfert
 	void BankFrame::ClientInfoSaveTransfer();
-	
+
 	// Méthode qui gère la fermeture de la fenêtre
 	void BankFrame::OnClose(wxCloseEvent& evt);
 
@@ -161,7 +132,7 @@ private:
 	wxArrayDouble balance_;
 	wxArrayString transactionList_;
 	wxArrayInt transactionListAccount_;
-	
+
 
 	// Le panneau sur lequel on va mettre les élements
 	wxPanel* panel_;

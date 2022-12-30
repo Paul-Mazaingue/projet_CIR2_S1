@@ -1,4 +1,4 @@
-﻿cmake_minimum_required(VERSION 3.18)
+cmake_minimum_required(VERSION 3.18)
 project(bank)
 
 if(MSVC)
@@ -12,7 +12,7 @@ endif (MSVC)
 find_package(wxWidgets REQUIRED COMPONENTS net core base)
 include(${wxWidgets_USE_FILE})
 
-add_executable(bank bank.cpp    "serveur.cpp" "paris.cpp" "berlin.cpp" "londre.cpp")
+add_executable(bank bank.cpp   )
 
 if(MSVC)
     set_target_properties(bank PROPERTIES LINK_FLAGS /SUBSYSTEM:WINDOWS)
@@ -24,14 +24,4 @@ target_link_libraries(bank ${wxWidgets_LIBRARIES})
 set(Boost_ROOT "C:/tools/Boost")
 find_package(Boost REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
-
-add_executable(serveur serveur.cpp)
-add_executable(berlin berlin.cpp)
-add_executable(paris paris.cpp)
-add_executable(londre londre.cpp)
-
 target_link_libraries(bank ${Boost_LIBRARIES})
-target_link_libraries(serveur ${Boost_LIBRARIES})
-target_link_libraries(berlin ${Boost_LIBRARIES})
-target_link_libraries(paris ${Boost_LIBRARIES})
-target_link_libraries(londre ${Boost_LIBRARIES})
