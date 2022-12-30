@@ -3,7 +3,7 @@
 #
 cmake_minimum_required (VERSION 3.8)
 
-project ("Banque_APP")
+project ("bank")
 
 # Incluez les sous-projets.
-add_subdirectory ("Banque_APP")
+add_subdirectory ("bank")

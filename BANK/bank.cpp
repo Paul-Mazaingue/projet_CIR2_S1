@@ -1,7 +1,77 @@
-﻿#include "Banque_APP.h"
+﻿#include "bank.h"
 
 using namespace std;
+//fonctions de sockets
+int receiveint(tcp::socket& socket) {
+	int n;
+	boost::asio::mutable_buffer buffer = boost::asio::buffer(&n, sizeof(n));
+	std::size_t bytes_transferred = 0;
+	boost::system::error_code error;
+	while (bytes_transferred < sizeof(n)) {
+		bytes_transferred += boost::asio::read(socket, buffer, boost::asio::transfer_all(), error);
+		if (error) {
+			// Gérer l'erreur
+			return 0;
+		}
+		buffer = buffer + bytes_transferred;
+	}
+	int result = *static_cast<int*>(buffer.data());
+	return result;
+}
 
+string read_(tcp::socket& socket) {
+	boost::asio::streambuf buf;
+	boost::asio::read_until(socket, buf, "\n");
+	string data = boost::asio::buffer_cast<const char*>(buf.data());
+	return data;
+}
+
+int* receivetabint(tcp::socket& socket, int size) {
+	int* tab = new int[size];
+	boost::asio::mutable_buffer buffer = boost::asio::buffer(tab, size * sizeof(int));
+	boost::system::error_code error;
+	std::size_t bytes_transferred = 0;
+	while (bytes_transferred < size * sizeof(int)) {
+		bytes_transferred += boost::asio::read(socket, buffer, boost::asio::transfer_all(), error);
+		if (error) {
+			// Gérer l'erreur
+			return nullptr;
+		}
+		buffer = buffer + bytes_transferred;
+	}
+	return tab;
+}
+string* receivetabstring(tcp::socket& socket, int size) {
+	string* tab = new string[size];
+	boost::asio::mutable_buffer buffer = boost::asio::buffer(tab, size * sizeof(string));
+	boost::system::error_code error;
+	std::size_t bytes_transferred = 0;
+	while (bytes_transferred < size * sizeof(string)) {
+		bytes_transferred += boost::asio::read(socket, buffer, boost::asio::transfer_all(), error);
+		if (error) {
+			// Gérer l'erreur
+			return nullptr;
+		}
+		buffer = buffer + bytes_transferred;
+	}
+	return tab;
+}
+
+double* receivetabdouble(tcp::socket& socket, int size) {
+	double* tab = new double[size];
+	boost::asio::mutable_buffer buffer = boost::asio::buffer(tab, size * sizeof(double));
+	boost::system::error_code error;
+	std::size_t bytes_transferred = 0;
+	while (bytes_transferred < size * sizeof(double)) {
+		bytes_transferred += boost::asio::read(socket, buffer, boost::asio::transfer_all(), error);
+		if (error) {
+			// Gérer l'erreur
+			return nullptr;
+		}
+		buffer = buffer + bytes_transferred;
+	}
+	return tab;
+}
 // Fenêtre de la banque
 BankFrame::BankFrame(const wxString& title): wxFrame(nullptr, wxID_ANY, title)
 {
@@ -174,7 +244,7 @@ void BankFrame::OnAddAccount(wxCommandEvent& event) {
 				wxString transaction = wxString::Format("Ajout de %.2f", amount);
 				
 				// Si on est au max de transactions on supprime la plus ancienne
-				if (transactionList_.GetCount() == 9999) {
+				if (transactionList_.GetCount() == 999) {
 					transactionList_.RemoveAt(0);
 					transactionListAccount_.RemoveAt(0);
 				}
@@ -224,7 +294,7 @@ void BankFrame::OnWithdrawAccount(wxCommandEvent& event) {
 				wxString transaction = wxString::Format("Retrait de %.2f", amount);
 				
 				// Si on est au max de transactions on supprime la plus ancienne
-				if (transactionList_.GetCount() == 9999) {
+				if (transactionList_.GetCount() == 999) {
 					transactionList_.RemoveAt(0);
 					transactionListAccount_.RemoveAt(0);
 				}
@@ -373,11 +443,11 @@ void BankFrame::OnTransferAccount(wxCommandEvent& event) {
 							
 
 							// si le nombre de transaction est au max on supprime la plus ancienne
-							if (transactionListTransfer_.GetCount() == 9999) {
+							if (transactionListTransfer_.GetCount() == 999) {
 								transactionListTransfer_.RemoveAt(0);
 								transactionListAccountTransfer_.RemoveAt(0);
 							}
-							if (transactionList_.GetCount() == 9999) {
+							if (transactionList_.GetCount() == 999) {
 								transactionList_.RemoveAt(0);
 								transactionListAccount_.RemoveAt(0);
 							}
@@ -628,7 +698,7 @@ void BankFrame::OnCreateAccount(wxCommandEvent& event) {
 				selectedIndexAccount_ = accountName_.GetCount() - 1;
 				
 				// Si le nombre de transaction est au max on supprime la plus ancienne
-				if (transactionList_.GetCount() == 9999) {
+				if (transactionList_.GetCount() == 999) {
 					transactionList_.RemoveAt(0);
 					transactionListAccount_.RemoveAt(0);
 				}
@@ -769,12 +839,12 @@ void BankFrame::Connexion(wxCommandEvent& event)
 // Méthode qui génère un numéro de client
 int BankFrame::GenerateClientNumber()
 {
-	// On génère un numéro de client aléatoire entre 100000 et 999999
+	// On génère un numéro de client aléatoire entre 100000 et 99999
 	bool ok = false;
 	while(true){
 		std::random_device rd;
 		std::mt19937 gen(rd());
-		std::uniform_int_distribution<> dis(100000, 999999);
+		std::uniform_int_distribution<> dis(100000, 99999);
 		// On vérifie que le numéro de client n'existe pas déjà
 		ok = IsPresent(dis(gen));
 		if(ok){
@@ -865,7 +935,7 @@ void BankFrame::Creation(wxCommandEvent& event)
 			// Si le nombre de transaction est au max on supprime la première transaction
 
 	       
-			if (transactionList_.GetCount() == 9999) {
+			if (transactionList_.GetCount() == 999) {
 				transactionList_.RemoveAt(0);
 				transactionListAccount_.RemoveAt(0);
 			}
@@ -888,57 +958,77 @@ void BankFrame::Creation(wxCommandEvent& event)
 
 // Méthode qui récupère les infos du client
 bool BankFrame::ClientInfo(wxString clientNumber, wxString password) {
-	boost::property_tree::ptree pt;
+	boost::asio::io_service io_service;
+	//socket creation
+	tcp::socket socket(io_service);
+	if (server_ == 1) {
+		socket.connect(tcp::endpoint(boost::asio::ip::address::from_string("127.0.0.1"), 1234));
+	}
+	boost::system::error_code error;
+	boost::asio::write(socket, boost::asio::buffer(&clientNumber_, sizeof(clientNumber_)), error);
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
+	int server_ = receiveint(socket);
 
-	// Si le fichier n'existe pas, on affiche une erreur
-	std::ifstream file("bank.json");
-	if (!file.good()) {
+	if (server_ == 0) {
 		return false;
 	}
+		
 	
+	string lastname_ = read_(socket);
 
-	// On lit le fichier JSON
-	try {
-		read_json("bank.json", pt);
-	}
-	catch (const std::exception& e) {
-		wxMessageBox(e.what(), "Erreur", wxOK | wxICON_ERROR);
-	}
+	string firstname_ = read_(socket);
 
-	// On parcourt les clients
-	if (pt.count(clientNumber.ToStdString()) == 0) // on vérifie que le numéro de client existe dans le fichier json
-	{
-		return false;
-	}
-
+	string address_ = read_(socket);
+	
 	// On compare le mot de passe
-	password_ = pt.get<std::string>(clientNumber.ToStdString() + ".password_");
-	if (password != password_) // vérifie que le mot de passe est correct
+	string password_ = read_(socket);
+
+	if (password.ToStdString() != password_) // vérifie que le mot de passe est correct
 	{
 		password_ = "";
-		return false;
+			return false;
 	}
-	
-	// On récupère les infos du client et les stocke dans les attributs de la classe
-	firstName_ = pt.get<std::string>(clientNumber.ToStdString() + ".firstname_");
-	lastName_ = pt.get<std::string>(clientNumber.ToStdString() + ".lastName_");
-	address_ = pt.get<std::string>(clientNumber.ToStdString() + ".address_");
-	password_ = pt.get<std::string>(clientNumber.ToStdString() + ".password_");
+		
 	clientNumber.ToDouble(&clientNumber_);
 
-	// On récupère les infos des comptes du client et les stocke dans les wxArray correspondants
-	for (auto& account : pt.get_child(clientNumber.ToStdString() + ".accountName_"))
+		
+	string* accountName = receivetabstring(socket, 100);
+	int* AccType = receivetabint(socket, 100);
+	double* balance = receivetabdouble(socket, 100);
+		
+	int count = 0;
+	for (int i = 0; i < 100; i++)
 	{
-		accountName_.Add(account.second.data());
-		accountType_.Add(std::stoi(pt.get<std::string>(clientNumber.ToStdString() + ".accountType_." + account.first)));
-		balance_.Add(std::stod(pt.get<std::string>(clientNumber.ToStdString() + ".balance_." + account.first)));
+		if (accountName_[i] != "")
+		{
+			count++;
+		}
 	}
 
-	// On récupère les infos des transactions du client et les stocke dans les wxArray correspondants
-	for (auto& transaction : pt.get_child(clientNumber.ToStdString() + ".transactionList_"))
+	for(int i = 0; i < count ; i++)
 	{
-		transactionList_.Add(transaction.second.data());
-		transactionListAccount_.Add(std::stoi(pt.get<std::string>(clientNumber.ToStdString() + ".transactionListAccount_." + transaction.first)));
+		accountName_.Add(accountName[i]);
+		accountType_.Add(AccType[i]);
+		balance_.Add(balance[i]);
+	}
+
+		
+	string* transList = receivetabstring(socket, 1000);
+	int* transListAcc = receivetabint(socket, 1000);
+
+	count = 0;
+	for (int i = 0; i < 1000; i++)
+	{
+		if (transList[i] != "")
+		{
+			count++;
+		}
+	}
+
+	for (int i = 0; i < count; i++)
+	{
+		transactionList_.Add(transList[i]);
+		transactionListAccount_.Add(transListAcc[i]);	
 	}
 
 	return true;

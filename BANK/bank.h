@@ -5,6 +5,35 @@
 #include <boost/property_tree/json_parser.hpp>
 #include <fstream>
 
+
+#include <queue>
+#include <random>
+#include <chrono>
+#include <optional>
+#include <boost/asio.hpp>
+#include <boost/system/error_code.hpp>
+#include <string>
+#include <memory>
+#include <vector>
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/serialization/serialization.hpp>
+
+using std::string;
+using std::to_string;
+using std::vector;
+using std::queue;
+using std::cin;
+using std::cout;
+using std::endl;
+using std::ostream;
+using std::random_device;
+using std::default_random_engine;
+using std::uniform_int_distribution;
+using namespace std::chrono_literals;
+using boost::asio::ip::tcp;
+using boost::asio::read;
+using boost::system::error_code;
 // Fenêtre de la banque
 class BankFrame : public wxFrame
 {
