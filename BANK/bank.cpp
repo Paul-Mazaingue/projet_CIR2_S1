@@ -1,4 +1,5 @@
-﻿#include "bank.h"
+﻿// Code fait par Paul Mazaingue
+#include "bank.h"
 
 using namespace std;
 
@@ -552,6 +553,11 @@ void BankFrame::OnDeleteAccount(wxCommandEvent& event) {
 	if (selectedIndexAccount_ == wxNOT_FOUND) {
 		// Si aucun compte n'est sélectionné on affiche un message d'erreur
 		wxMessageBox("Aucun compte sélectionné !", "Erreur", wxICON_ERROR);
+		return;
+	}
+
+	if (accountName_.size() == 1) {
+		wxMessageBox("Vous devez avoir au moins un compte", "Erreur", wxICON_ERROR);
 		return;
 	}
 

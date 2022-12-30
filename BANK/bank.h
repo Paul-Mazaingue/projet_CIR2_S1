@@ -1,4 +1,5 @@
-﻿#include <iostream>
+﻿// Code fait par Paul Mazaingue
+#include <iostream>
 #include <wx/wx.h>
 #include <random>
 #include <boost/property_tree/ptree.hpp>
